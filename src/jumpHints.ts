@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { sortBy } from "lodash";
 import { LizardContext, LizardState, LizardTransaction } from "./stateContexts";
 import { debug } from "./debug";
+import { TreeSitterNode, TreeSitterPoint } from "./treeSitter";
 
 const dvorakAlphabet = "aoeuidhtnsqjkxbmwvzyfpglcr".split("");
 
@@ -31,16 +32,16 @@ export const getJumpHints = (length: number) => {
 };
 
 export const getNearestPositions = (
-  cursor: vscode.Position,
-  positions: vscode.Range[],
+  cursor: TreeSitterPoint,
+  matches: TreeSitterNode[],
 ) => {
-  return sortBy(positions, (range) =>
-    getPositionDistance(cursor, range.start),
+  return sortBy(matches, (range) =>
+    getPositionDistance(cursor, range.startPosition),
   ).slice(0, MAX_JUMP_HINTS);
 };
 
-export const getPositionDistance = (a: vscode.Position, b: vscode.Position) =>
-  Math.abs(a.line - b.line) + Math.abs(a.character - b.character);
+export const getPositionDistance = (a: TreeSitterPoint, b: TreeSitterPoint) =>
+  Math.abs(a.row - b.row) + Math.abs(a.column - b.column);
 
 const jumpTypes = {
   condition: {
@@ -89,24 +90,17 @@ export const createJumpingState = (
   const query = ctx.language.query(jumpTypes[type].query);
   const matches = query.matches(ctx.tree.rootNode);
   const visibleRanges = getNearestPositions(
-    ctx.getCursor() ?? new vscode.Position(0, 0),
+    ctx.getCursor() ?? { row: 0, column: 0 },
     matches
-      .map((match) => {
-        const capture = match.captures[0];
-        const startPos = new vscode.Position(
-          capture.node.startPosition.row,
-          capture.node.startPosition.column,
-        );
-        return new vscode.Range(startPos, startPos);
-      })
-      .filter((range) => {
-        return ctx.isRangeVisible(range);
+      .map((match) => match.captures[0].node)
+      .filter((match) => {
+        return ctx.isRangeVisible(match.startPosition, match.endPosition);
       }),
   );
   const hints = getJumpHints(visibleRanges.length);
-  const jumpTargets = visibleRanges.map((range, index) => {
+  const jumpTargets = visibleRanges.map((node, index) => {
     return {
-      range,
+      node,
       hint: hints[index],
     };
   });
@@ -144,7 +138,7 @@ export const createJumpingState = (
                 effects: [
                   {
                     type: "jumpTo",
-                    range: target.range,
+                    node: target.node,
                   },
                 ],
               };

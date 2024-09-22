@@ -1,6 +1,7 @@
 import { debug } from "console";
 import { jumpCommand } from "./jumpHints";
 import { LizardState } from "./stateContexts";
+import { moveVertical } from "./commands/navigation";
 
 export const createLizardModeState = (): LizardState => {
   return {
@@ -16,6 +17,10 @@ export const createLizardModeState = (): LizardState => {
             preventEditorAction: true,
             done: true,
           };
+        }
+
+        if (event.text === "j") {
+          return moveVertical(ctx, 1);
         }
 
         // Jump to node type

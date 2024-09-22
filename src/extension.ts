@@ -4,7 +4,12 @@ import * as TreeSitterWasm from "@vscode/tree-sitter-wasm";
 import * as vscode from "vscode";
 import { createLizardModeState } from "./lizardMode";
 import { LizardContext, LizardState, LizardTransaction } from "./stateContexts";
-import { initializeParser, TreeSitter } from "./treeSitter";
+import {
+  initializeParser,
+  TreeSitter,
+  TreeSitterNode,
+  TreeSitterPoint,
+} from "./treeSitter";
 import { applyEffect, CodeContext } from "./vscodeBridge";
 import { debug } from "./debug";
 
@@ -183,6 +188,8 @@ export function activate(context: vscode.ExtensionContext) {
       };
     };
 
+    let currentNode: TreeSitterNode | null = null;
+
     handleType = (args: { text: string }) => {
       const editor = vscode.window.activeTextEditor;
 
@@ -200,20 +207,37 @@ export function activate(context: vscode.ExtensionContext) {
         language: jsLanguage,
         treeSitter: TreeSitter,
         tree,
+
+        getCurrentNode: () => {
+          return currentNode;
+        },
         getCursor: () => {
           const cursor = editor.selection.active;
 
-          return cursor ? cursor : null;
+          return cursor
+            ? {
+                row: cursor.line,
+                column: cursor.character,
+              }
+            : null;
         },
-        isRangeVisible: (range: vscode.Range) => {
+        isRangeVisible: (a: TreeSitterPoint, b: TreeSitterPoint) => {
           return editor.visibleRanges.some((visibleRange) => {
-            return visibleRange.intersection(range);
+            return visibleRange.intersection(
+              new vscode.Range(
+                new vscode.Position(a.row, a.column),
+                new vscode.Position(b.row, b.column),
+              ),
+            );
           });
         },
       };
 
       const codeContext: CodeContext = {
         editor,
+        setCurrentNode: (node: TreeSitterNode | null) => {
+          currentNode = node;
+        },
       };
 
       if (stateStack.length === 0) {

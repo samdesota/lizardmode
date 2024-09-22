@@ -1,5 +1,4 @@
 const esbuild = require("esbuild");
-const importMetaUrl = require("@chialab/esbuild-plugin-meta-url");
 
 const production = process.argv.includes("--production");
 const watch = process.argv.includes("--watch");
@@ -27,6 +26,8 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
+  const importMetaURL = (await import("@chialab/esbuild-plugin-meta-url"))
+    .default;
   const ctx = await esbuild.context({
     entryPoints: ["src/extension.ts"],
     bundle: true,
@@ -41,7 +42,7 @@ async function main() {
     plugins: [
       /* add to the end of plugins array */
       esbuildProblemMatcherPlugin,
-      importMetaUrl(),
+      importMetaURL(),
     ],
   });
   if (watch) {

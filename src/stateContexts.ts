@@ -1,17 +1,23 @@
 import * as vscode from "vscode";
-import { TreeSitter, TreeSitterLanguage, TreeSitterTree } from "./treeSitter";
+import {
+  TreeSitter,
+  TreeSitterLanguage,
+  TreeSitterNode,
+  TreeSitterPoint,
+  TreeSitterTree,
+} from "./treeSitter";
 
 export type EditorEffect =
   | {
       type: "showHints";
       locations: {
-        range: vscode.Range;
+        node: TreeSitterNode;
         hint: string;
       }[];
     }
   | {
       type: "jumpTo";
-      range: vscode.Range;
+      node: TreeSitterNode;
     };
 
 export type EditorEvent = {
@@ -23,8 +29,9 @@ export interface LizardContext {
   treeSitter: typeof TreeSitter;
   tree: TreeSitterTree;
   language: TreeSitterLanguage;
-  getCursor(): vscode.Position | null;
-  isRangeVisible(range: vscode.Range): boolean;
+  getCursor(): TreeSitterPoint | null;
+  getCurrentNode(): TreeSitterNode | null;
+  isRangeVisible(start: TreeSitterPoint, end: TreeSitterPoint): boolean;
 }
 
 export interface LizardTransaction {

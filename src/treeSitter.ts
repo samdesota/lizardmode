@@ -19,6 +19,10 @@ export type TreeSitterLanguage = TreeSitterWasm.Parser.Language;
 
 export type TreeSitterTree = ReturnType<TreeSitterWasm.Parser["parse"]>;
 
+export type TreeSitterNode = TreeSitterTree["rootNode"];
+
+export type TreeSitterPoint = TreeSitterNode["startPosition"];
+
 export const initializeParser = async () => {
   await TreeSitter.init({
     locateFile: () => {
