@@ -1,38 +1,27 @@
-import { debug } from "console";
-import { jumpCommand } from "./jumpHints";
-import { LizardState } from "./stateContexts";
 import { moveVertical } from "./commands/navigation";
+import { replaceNode } from "./commands/replaceNode";
+import { jump } from "./jumpHints";
+import { LizardContext } from "./stateContexts";
 
-export const createLizardModeState = (): LizardState => {
-  return {
-    __name: "lizard mode",
-    onEvent: (ctx, event) => {
-      debug(__filename, "handling lizard mode event", event);
-
-      if (event.type === "type") {
-        // Enter insert mode
-        if (event.text === "i") {
-          debug(__filename, "exiting lizard mode");
-          return {
-            preventEditorAction: true,
-            done: true,
-          };
-        }
-
-        if (event.text === "j") {
-          return moveVertical(ctx, 1);
-        }
-
-        // Jump to node type
-        if (event.text === "g") {
-          return jumpCommand(ctx);
-        }
-      }
-
-      return {
-        preventEditorAction: true,
-        done: false,
-      };
-    },
-  };
+const keyMap = {
+  j: (ctx: LizardContext) => moveVertical(ctx, 1),
+  k: (ctx: LizardContext) => moveVertical(ctx, -1),
+  g: (ctx: LizardContext) => jump(ctx),
+  r: (ctx: LizardContext) => replaceNode(ctx),
 };
+
+export async function createLizardModeState(ctx: LizardContext) {
+  while (true) {
+    const input = await ctx.readInput();
+
+    const handler = keyMap[input as keyof typeof keyMap];
+
+    if (input === "i") {
+      break;
+    }
+
+    if (handler) {
+      await handler(ctx);
+    }
+  }
+}

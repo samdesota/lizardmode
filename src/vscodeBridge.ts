@@ -1,6 +1,4 @@
 import * as vscode from "vscode";
-import { EditorEffect } from "./stateContexts";
-import { debug } from "console";
 import { TreeSitterNode } from "./treeSitter";
 
 export interface CodeContext {
@@ -8,21 +6,22 @@ export interface CodeContext {
   setCurrentNode(node: TreeSitterNode | null): void;
 }
 
-const decoratorType = vscode.window.createTextEditorDecorationType({
+export const decoratorType = vscode.window.createTextEditorDecorationType({
   after: {},
 });
 
-const focusedDecoratorType = vscode.window.createTextEditorDecorationType({
-  borderRadius: "3px",
+export const focusedDecoratorType =
+  vscode.window.createTextEditorDecorationType({
+    borderRadius: "3px",
 
-  dark: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  },
+    dark: {
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    },
 
-  light: {
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-  },
-});
+    light: {
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
+    },
+  });
 
 export const toVscodeRange = (
   a: TreeSitterNode["startPosition"],
@@ -34,50 +33,7 @@ export const toVscodeRange = (
   );
 };
 
-export const applyEffect = (codeContext: CodeContext, effect: EditorEffect) => {
-  debug(__filename, "applying effect", effect);
-
-  if (effect.type === "showHints") {
-    codeContext.editor.setDecorations(
-      decoratorType,
-      effect.locations.map((location) => {
-        return {
-          range: toVscodeRange(
-            location.node.startPosition,
-            location.node.endPosition,
-          ),
-          renderOptions: {
-            before: {
-              contentText: ` ${location.hint} `,
-              border: "1px solid white",
-              fontSize: "0.8rem",
-              color: "white",
-            },
-          },
-        };
-      }),
-    );
-  } else if (effect.type === "jumpTo") {
-    const range = toVscodeRange(
-      effect.node.startPosition,
-      effect.node.endPosition,
-    );
-
-    codeContext.editor.revealRange(range);
-    codeContext.editor.selection = new vscode.Selection(
-      range.start,
-      range.start,
-    );
-    codeContext.editor.setDecorations(
-      focusedDecoratorType,
-      getRangesWithoutInitialWhitespace(codeContext.editor.document, range),
-    );
-    codeContext.setCurrentNode(effect.node);
-
-    return;
-  }
-};
-function getRangesWithoutInitialWhitespace(
+export function getRangesWithoutInitialWhitespace(
   document: vscode.TextDocument,
   range: vscode.Range,
 ): vscode.Range[] {

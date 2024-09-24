@@ -32,6 +32,10 @@ export interface LizardContext {
   getCursor(): TreeSitterPoint | null;
   getCurrentNode(): TreeSitterNode | null;
   isRangeVisible(start: TreeSitterPoint, end: TreeSitterPoint): boolean;
+  readInput(): Promise<string>;
+  jumpTo(node: TreeSitterNode): void;
+  showHints(hints: { node: TreeSitterNode; hint: string }[]): void;
+  replaceText(start: TreeSitterPoint, end: TreeSitterPoint, text: string): void;
 }
 
 export interface LizardTransaction {

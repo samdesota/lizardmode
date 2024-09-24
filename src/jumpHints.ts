@@ -1,7 +1,6 @@
-import * as vscode from "vscode";
 import { sortBy } from "lodash";
-import { LizardContext, LizardState, LizardTransaction } from "./stateContexts";
 import { debug } from "./debug";
+import { LizardContext } from "./stateContexts";
 import { TreeSitterNode, TreeSitterPoint } from "./treeSitter";
 
 const dvorakAlphabet = "aoeuidhtnsqjkxbmwvzyfpglcr".split("");
@@ -58,34 +57,15 @@ const jumpMap: Record<string, keyof typeof jumpTypes> = {
   ";": "statement",
 };
 
-export const jumpCommand = (ctx: LizardContext): LizardTransaction => {
-  return {
-    done: false,
-    preventEditorAction: true,
-    states: [
-      {
-        __name: "jumpCommand",
-        onEvent: (ctx, event) => {
-          if (event.type === "type" && jumpMap[event.text]) {
-            const jumpType = jumpMap[event.text];
-            return createJumpingState(ctx, jumpType);
-          }
+export async function requestStatementType(ctx: LizardContext) {
+  const input = await ctx.readInput();
+  return jumpMap[input];
+}
 
-          return {
-            done: true,
-            preventEditorAction: true,
-          };
-        },
-      },
-    ],
-    effects: [],
-  };
-};
-
-export const createJumpingState = (
+export function createJumpTargets(
   ctx: LizardContext,
   type: keyof typeof jumpTypes,
-): LizardTransaction => {
+) {
   debug(__filename, "creating jump hints", type);
   const query = ctx.language.query(jumpTypes[type].query);
   const matches = query.matches(ctx.tree.rootNode);
@@ -104,59 +84,38 @@ export const createJumpingState = (
       hint: hints[index],
     };
   });
+  return jumpTargets;
+}
 
-  debug(__filename, "found jump targets", jumpTargets.length);
+export async function selectNode(ctx: LizardContext) {
+  const type = await requestStatementType(ctx);
 
-  return {
-    done: true,
-    preventEditorAction: true,
-    states: [
-      {
-        __name: `jump to ${type}`,
-        onDispose: () => {
-          debug(__filename, "creating jump dispose effects");
+  if (!type) {
+    return;
+  }
 
-          return [
-            {
-              type: "showHints",
-              locations: [],
-            },
-          ];
-        },
-        onEvent: (ctx, event) => {
-          if (event.type === "type") {
-            debug(__filename, "handling jump to target", event.text);
+  const jumpTargets = createJumpTargets(ctx, type);
 
-            const target = jumpTargets.find((target) => {
-              return target.hint === event.text;
-            });
+  if (jumpTargets.length === 0) {
+    return;
+  }
 
-            if (target) {
-              return {
-                done: true,
-                preventEditorAction: true,
-                effects: [
-                  {
-                    type: "jumpTo",
-                    node: target.node,
-                  },
-                ],
-              };
-            }
-          }
+  ctx.showHints(jumpTargets);
 
-          return {
-            done: true,
-            preventEditorAction: true,
-          };
-        },
-      },
-    ],
-    effects: [
-      {
-        type: "showHints",
-        locations: jumpTargets,
-      },
-    ],
-  };
-};
+  try {
+    const hint = await ctx.readInput();
+    const target = jumpTargets.find((target) => target.hint === hint);
+
+    return target?.node;
+  } finally {
+    ctx.showHints([]);
+  }
+}
+
+export async function jump(ctx: LizardContext) {
+  const node = await selectNode(ctx);
+
+  if (node) {
+    ctx.jumpTo(node);
+  }
+}

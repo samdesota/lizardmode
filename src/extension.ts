@@ -2,16 +2,10 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as TreeSitterWasm from "@vscode/tree-sitter-wasm";
 import * as vscode from "vscode";
-import { createLizardModeState } from "./lizardMode";
-import { LizardContext, LizardState, LizardTransaction } from "./stateContexts";
-import {
-  initializeParser,
-  TreeSitter,
-  TreeSitterNode,
-  TreeSitterPoint,
-} from "./treeSitter";
-import { applyEffect, CodeContext } from "./vscodeBridge";
+import { CodeLizardContext } from "./CodeLizardContext";
 import { debug } from "./debug";
+import { createLizardModeState } from "./lizardMode";
+import { initializeParser, TreeSitter } from "./treeSitter";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -66,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
       "javascriptreact",
     ];
 
-    const initializeDocumentTree = async (document: vscode.TextDocument) => {
+    const initializeDocumentTree = (document: vscode.TextDocument) => {
       if (!supportedLanguages.includes(document.languageId)) {
         return;
       }
@@ -74,8 +68,9 @@ export function activate(context: vscode.ExtensionContext) {
       if (parsers.has(document.uri.toString())) {
         return;
       }
-
-      parsers.set(document.uri.toString(), parser.parse(document.getText()));
+      const tree = parser.parse(document.getText());
+      parsers.set(document.uri.toString(), tree);
+      return tree;
     };
 
     addDisposable(
@@ -130,10 +125,36 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }),
     );
+
+    function startLizardMode(editor: vscode.TextEditor) {
+      const tree = initializeDocumentTree(editor.document);
+
+      if (tree) {
+        const lizardContext = new CodeLizardContext(
+          TreeSitter,
+          tree,
+          jsLanguage,
+          async () => {
+            return new Promise<string>((resolve) => {
+              handleType = (args) => {
+                resolve(args.text);
+                handleType = null;
+
+                return { preventDefault: true };
+              };
+            });
+          },
+          editor,
+        );
+
+        createLizardModeState(lizardContext);
+      }
+    }
+
     addDisposable(
       vscode.window.onDidChangeActiveTextEditor((editor) => {
         if (editor) {
-          initializeDocumentTree(editor.document);
+          startLizardMode(editor);
         } else {
           console.log("No active editor");
         }
@@ -142,119 +163,17 @@ export function activate(context: vscode.ExtensionContext) {
 
     addDisposable(
       vscode.commands.registerCommand("lizardmode.enter", () => {
-        if (stateStack.length === 0) {
-          debug(__filename, "entering lizard mode");
-          stateStack.push(createLizardModeState());
-          return;
+        debug(__filename, "entering lizard mode");
+
+        if (vscode.window.activeTextEditor) {
+          startLizardMode(vscode.window.activeTextEditor);
         }
       }),
     );
 
     if (vscode.window.activeTextEditor) {
-      initializeDocumentTree(vscode.window.activeTextEditor.document);
+      startLizardMode(vscode.window.activeTextEditor);
     }
-
-    const stateStack: LizardState[] = [createLizardModeState()];
-
-    const transact = (
-      ctx: LizardContext,
-      codeContext: CodeContext,
-      transaction: LizardTransaction,
-    ) => {
-      debug(__filename, "transacting", transaction);
-
-      if (transaction.done) {
-        const popped = stateStack.pop();
-
-        if (popped?.onDispose) {
-          const disposeEffects = popped.onDispose(ctx);
-
-          disposeEffects.map((effect) => {
-            applyEffect(codeContext, effect);
-          });
-        }
-      }
-
-      transaction.effects?.map((effect) => {
-        applyEffect(codeContext, effect);
-      });
-
-      if (transaction.states) {
-        stateStack.push(...transaction.states);
-      }
-
-      return {
-        preventDefault: transaction.preventEditorAction,
-      };
-    };
-
-    let currentNode: TreeSitterNode | null = null;
-
-    handleType = (args: { text: string }) => {
-      const editor = vscode.window.activeTextEditor;
-
-      if (!editor) {
-        return;
-      }
-
-      const tree = parsers.get(editor.document.uri.toString());
-
-      if (!tree) {
-        return;
-      }
-
-      const lizardCtx: LizardContext = {
-        language: jsLanguage,
-        treeSitter: TreeSitter,
-        tree,
-
-        getCurrentNode: () => {
-          return currentNode;
-        },
-        getCursor: () => {
-          const cursor = editor.selection.active;
-
-          return cursor
-            ? {
-                row: cursor.line,
-                column: cursor.character,
-              }
-            : null;
-        },
-        isRangeVisible: (a: TreeSitterPoint, b: TreeSitterPoint) => {
-          return editor.visibleRanges.some((visibleRange) => {
-            return visibleRange.intersection(
-              new vscode.Range(
-                new vscode.Position(a.row, a.column),
-                new vscode.Position(b.row, b.column),
-              ),
-            );
-          });
-        },
-      };
-
-      const codeContext: CodeContext = {
-        editor,
-        setCurrentNode: (node: TreeSitterNode | null) => {
-          currentNode = node;
-        },
-      };
-
-      if (stateStack.length === 0) {
-        return {
-          preventDefault: false,
-        };
-      }
-
-      return transact(
-        lizardCtx,
-        codeContext,
-        stateStack[stateStack.length - 1].onEvent(lizardCtx, {
-          type: "type",
-          text: args.text,
-        }),
-      );
-    };
   });
 }
 
