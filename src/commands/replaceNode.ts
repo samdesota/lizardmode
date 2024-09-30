@@ -9,9 +9,11 @@ export async function replaceNode(ctx: LizardContext) {
     return;
   }
 
-  ctx.replaceText(
-    currentNode.startPosition,
-    currentNode.endPosition,
-    newNode.text,
-  );
+  ctx.edit([
+    {
+      start: currentNode.startPosition,
+      end: currentNode.endPosition,
+      text: newNode.text,
+    },
+  ]);
 }

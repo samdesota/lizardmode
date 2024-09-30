@@ -7,7 +7,12 @@ export interface CodeContext {
 }
 
 export const decoratorType = vscode.window.createTextEditorDecorationType({
-  after: {},
+  rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
+  after: {
+    backgroundColor: "white",
+    color: "black",
+    margin: `0 0 0 -1.2em`,
+  },
 });
 
 export const focusedDecoratorType =

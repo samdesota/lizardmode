@@ -1,4 +1,4 @@
-import { sortBy } from "lodash";
+import { assign, sortBy } from "lodash";
 import { debug } from "./debug";
 import { LizardContext } from "./stateContexts";
 import { TreeSitterNode, TreeSitterPoint } from "./treeSitter";
@@ -44,17 +44,32 @@ export const getPositionDistance = (a: TreeSitterPoint, b: TreeSitterPoint) =>
 
 const jumpTypes = {
   condition: {
-    query: `(if_statement) @statement`,
+    query: `(if_statement) @target`,
   },
 
   statement: {
-    query: `(statement) @statement`,
+    query: `(statement) @target`,
+  },
+
+  function: {
+    query: `(function_declaration) @target`,
+  },
+
+  identifier: {
+    query: `(identifier) @target`,
+  },
+
+  assignment: {
+    query: `(assignment) @target`,
   },
 };
 
 const jumpMap: Record<string, keyof typeof jumpTypes> = {
   "?": "condition",
   ";": "statement",
+  f: "function",
+  i: "identifier",
+  a: "assignment",
 };
 
 export async function requestStatementType(ctx: LizardContext) {

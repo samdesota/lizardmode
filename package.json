@@ -22,14 +22,255 @@
     "keybindings": [
       {
         "command": "lizardmode.enter",
-        "key": "Escape",
-        "mac": "Escape",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
         "when": "editorTextFocus"
+      },
+      {
+        "key": "Escape",
+        "command": "lizardmode.leave",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "`",
+        "command": "lizard.type.code_96",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "1",
+        "command": "lizard.type.code_49",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "2",
+        "command": "lizard.type.code_50",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "3",
+        "command": "lizard.type.code_51",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "4",
+        "command": "lizard.type.code_52",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "5",
+        "command": "lizard.type.code_53",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "6",
+        "command": "lizard.type.code_54",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "7",
+        "command": "lizard.type.code_55",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "8",
+        "command": "lizard.type.code_56",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "9",
+        "command": "lizard.type.code_57",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "0",
+        "command": "lizard.type.code_48",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "-",
+        "command": "lizard.type.code_45",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "=",
+        "command": "lizard.type.code_61",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "q",
+        "command": "lizard.type.code_113",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "w",
+        "command": "lizard.type.code_119",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "e",
+        "command": "lizard.type.code_101",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "r",
+        "command": "lizard.type.code_114",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "t",
+        "command": "lizard.type.code_116",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "y",
+        "command": "lizard.type.code_121",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "u",
+        "command": "lizard.type.code_117",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "i",
+        "command": "lizard.type.code_105",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "o",
+        "command": "lizard.type.code_111",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "p",
+        "command": "lizard.type.code_112",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "[",
+        "command": "lizard.type.code_91",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "]",
+        "command": "lizard.type.code_93",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "\\",
+        "command": "lizard.type.code_92",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "a",
+        "command": "lizard.type.code_97",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "s",
+        "command": "lizard.type.code_115",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "d",
+        "command": "lizard.type.code_100",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "f",
+        "command": "lizard.type.code_102",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "g",
+        "command": "lizard.type.code_103",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "h",
+        "command": "lizard.type.code_104",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "j",
+        "command": "lizard.type.code_106",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "k",
+        "command": "lizard.type.code_107",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "l",
+        "command": "lizard.type.code_108",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": ";",
+        "command": "lizard.type.code_59",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "'",
+        "command": "lizard.type.code_39",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "z",
+        "command": "lizard.type.code_122",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "x",
+        "command": "lizard.type.code_120",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "c",
+        "command": "lizard.type.code_99",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "v",
+        "command": "lizard.type.code_118",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "b",
+        "command": "lizard.type.code_98",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "n",
+        "command": "lizard.type.code_110",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "m",
+        "command": "lizard.type.code_109",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": ",",
+        "command": "lizard.type.code_44",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": ".",
+        "command": "lizard.type.code_46",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "/",
+        "command": "lizard.type.code_47",
+        "when": "editorTextFocus && lizardmode.capture"
       }
     ]
   },
   "main": "./dist/extension.js",
   "scripts": {
+    "generate-bindings": "tsx ./src/scripts/generateBindings.ts",
     "vscode:prepublish": "pnpm run package",
     "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
@@ -41,10 +282,12 @@
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "jest": "jest"
   },
   "devDependencies": {
     "@chialab/esbuild-plugin-meta-url": "^0.18.2",
+    "@types/jest": "^29.5.13",
     "@types/lodash": "^4.17.7",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
@@ -57,10 +300,13 @@
     "esbuild": "^0.23.1",
     "esbuild-plugin-wasm": "^1.1.0",
     "eslint": "^9.9.1",
+    "jest": "^29.7.0",
     "lodash": "^4.17.21",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.3.3",
     "tree-sitter-wasms": "^0.1.12",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.1",
     "typescript": "^5.5.4",
     "web-tree-sitter": "^0.23.0"
   },

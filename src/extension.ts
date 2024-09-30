@@ -6,6 +6,7 @@ import { CodeLizardContext } from "./CodeLizardContext";
 import { debug } from "./debug";
 import { createLizardModeState } from "./lizardMode";
 import { initializeParser, TreeSitter } from "./treeSitter";
+import { bindings } from "./scripts/keys";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -36,20 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
     | null
     | ((args: { text: string }) => void | { preventDefault: boolean }) = null;
 
-  addDisposable(
-    vscode.commands.registerCommand("type", async (args) => {
-      if (handleType) {
-        const result = handleType(args);
-
-        if (result?.preventDefault) {
-          return;
-        }
-      }
-
-      await vscode.commands.executeCommand("default:type", args);
-    }),
-  );
-
   initializeParser().then(async ({ parser, language: jsLanguage }) => {
     debug(__filename, "initialized parser");
 
@@ -66,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       if (parsers.has(document.uri.toString())) {
-        return;
+        return parsers.get(document.uri.toString());
       }
       const tree = parser.parse(document.getText());
       parsers.set(document.uri.toString(), tree);
@@ -78,9 +65,9 @@ export function activate(context: vscode.ExtensionContext) {
         const uri = event.document.uri.toString();
 
         if (parsers.has(uri)) {
-          const parser = parsers.get(uri);
+          const tree = parsers.get(uri);
 
-          if (parser) {
+          if (tree) {
             event.contentChanges.forEach((change) => {
               const oldStartPos = change.range.start;
               const oldEndPos = change.range.end;
@@ -92,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
               const newEndIndex =
                 startIndex + Buffer.byteLength(newText, "utf-16le");
 
-              parser.edit({
+              tree.edit({
                 startIndex,
                 oldEndIndex,
                 newEndIndex,
@@ -110,6 +97,10 @@ export function activate(context: vscode.ExtensionContext) {
                 },
               });
             });
+
+            const newTree = parser.parse(event.document.getText());
+
+            parsers.set(uri, newTree);
           }
         }
       }),
@@ -126,28 +117,104 @@ export function activate(context: vscode.ExtensionContext) {
       }),
     );
 
-    function startLizardMode(editor: vscode.TextEditor) {
+    addDisposable(
+      vscode.Disposable.from(
+        ...bindings.map((binding) =>
+          vscode.commands.registerCommand(binding.command, () => {
+            if (handleType) {
+              handleType({ text: binding.key });
+            }
+          }),
+        ),
+      ),
+    );
+
+    addDisposable(
+      vscode.commands.registerCommand("lizardmode.leave", () => {
+        console.log("leaving lizard mode");
+        cancelEmitter.fire();
+      }),
+    );
+
+    let cancelEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter();
+
+    class CancelToken {
+      public message: string = "cancelled";
+    }
+
+    async function startLizardMode(editor: vscode.TextEditor) {
+      console.log("starting lizard mode");
       const tree = initializeDocumentTree(editor.document);
-
       if (tree) {
-        const lizardContext = new CodeLizardContext(
-          TreeSitter,
-          tree,
-          jsLanguage,
-          async () => {
-            return new Promise<string>((resolve) => {
-              handleType = (args) => {
-                resolve(args.text);
-                handleType = null;
+        let cancelled = false;
 
-                return { preventDefault: true };
-              };
-            });
-          },
-          editor,
+        if (cancelEmitter) {
+          console.log("cancelling lizard mode");
+          cancelEmitter.fire();
+        }
+
+        cancelEmitter = new vscode.EventEmitter();
+
+        cancelEmitter.event(() => {
+          cancelled = true;
+          vscode.commands.executeCommand(
+            "setContext",
+            "lizardmode.capture",
+            false,
+          );
+        });
+
+        vscode.commands.executeCommand(
+          "setContext",
+          "lizardmode.capture",
+          true,
         );
+        try {
+          const lizardContext = new CodeLizardContext(
+            TreeSitter,
+            parsers,
+            jsLanguage,
+            async () => {
+              return new Promise<string>((resolve, reject) => {
+                if (cancelled) {
+                  reject(new CancelToken());
+                  return;
+                }
 
-        createLizardModeState(lizardContext);
+                const cancelSubscription = cancelEmitter.event(() => {
+                  cancelSubscription.dispose();
+                  console.log("cancelled lizard mode");
+                  reject(new CancelToken());
+                });
+
+                handleType = (args) => {
+                  cancelSubscription.dispose();
+                  resolve(args.text);
+                  handleType = null;
+
+                  return { preventDefault: true };
+                };
+              });
+            },
+            editor,
+          );
+
+          await createLizardModeState(lizardContext);
+        } catch (e) {
+          if (e instanceof CancelToken) {
+            console.log("cancelled lizard mode");
+          } else {
+            console.error(e);
+          }
+        } finally {
+          if (!cancelled) {
+            vscode.commands.executeCommand(
+              "setContext",
+              "lizardmode.capture",
+              false,
+            );
+          }
+        }
       }
     }
 
@@ -163,8 +230,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     addDisposable(
       vscode.commands.registerCommand("lizardmode.enter", () => {
-        debug(__filename, "entering lizard mode");
-
         if (vscode.window.activeTextEditor) {
           startLizardMode(vscode.window.activeTextEditor);
         }

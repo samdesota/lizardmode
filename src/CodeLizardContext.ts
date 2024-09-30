@@ -13,17 +13,22 @@ import {
   getRangesWithoutInitialWhitespace,
   toVscodeRange,
 } from "./vscodeBridge";
+import { CursorNodeManager } from "./CursorNodeManager";
 
 export class CodeLizardContext implements LizardContext {
-  private currentNode: TreeSitterNode | null = null;
+  private cursorNodeManager = new CursorNodeManager(this);
 
   constructor(
     public treeSitter: typeof TreeSitter,
-    public tree: TreeSitterTree,
+    public trees: Map<string, TreeSitterTree>,
     public language: TreeSitterLanguage,
     public readInput: () => Promise<string>,
     private editor: vscode.TextEditor,
   ) {}
+
+  get tree() {
+    return this.trees.get(this.editor.document.uri.toString())!;
+  }
 
   getCursor(): TreeSitterPoint | null {
     const cursor = this.editor.selection.active;
@@ -37,7 +42,7 @@ export class CodeLizardContext implements LizardContext {
   }
 
   getCurrentNode(): TreeSitterNode | null {
-    return this.currentNode;
+    return this.cursorNodeManager.getCurrentNode();
   }
 
   isRangeVisible(a: TreeSitterPoint, b: TreeSitterPoint): boolean {
@@ -52,7 +57,7 @@ export class CodeLizardContext implements LizardContext {
   }
 
   jumpTo(node: TreeSitterNode): void {
-    this.currentNode = node;
+    this.cursorNodeManager.setCurrentNode(node);
     const range = toVscodeRange(node.startPosition, node.endPosition);
 
     this.editor.revealRange(range);
@@ -68,16 +73,13 @@ export class CodeLizardContext implements LizardContext {
       decoratorType,
       hints.map((location) => {
         return {
-          range: toVscodeRange(
-            location.node.startPosition,
-            location.node.endPosition,
-          ),
+          range: toVscodeRange(location.node.startPosition, {
+            row: location.node.startPosition.row,
+            column: location.node.startPosition.column + 2,
+          }),
           renderOptions: {
-            before: {
+            after: {
               contentText: ` ${location.hint} `,
-              border: "1px solid white",
-              fontSize: "0.8rem",
-              color: "white",
             },
           },
         };
@@ -85,14 +87,31 @@ export class CodeLizardContext implements LizardContext {
     );
   }
 
-  replaceText(
-    start: TreeSitterPoint,
-    end: TreeSitterPoint,
-    text: string,
+  edit(
+    edits: {
+      start: TreeSitterPoint;
+      end: TreeSitterPoint;
+      text: string;
+    }[],
   ): void {
-    const range = toVscodeRange(start, end);
+    this.cursorNodeManager.handleEdits(
+      edits.map((edit) => {
+        return {
+          start: this.editor.document.offsetAt(
+            new vscode.Position(edit.start.row, edit.start.column),
+          ),
+          end: this.editor.document.offsetAt(
+            new vscode.Position(edit.end.row, edit.end.column),
+          ),
+          delta: edit.text.length,
+        };
+      }),
+    );
     this.editor.edit((editBuilder) => {
-      editBuilder.replace(range, text);
+      for (const edit of edits) {
+        const range = toVscodeRange(edit.start, edit.end);
+        editBuilder.replace(range, edit.text);
+      }
     });
   }
 }

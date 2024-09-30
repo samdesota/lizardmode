@@ -1,5 +1,6 @@
 import { moveVertical } from "./commands/navigation";
 import { replaceNode } from "./commands/replaceNode";
+import { swapSiblingNodes } from "./commands/swapNodes";
 import { jump } from "./jumpHints";
 import { LizardContext } from "./stateContexts";
 
@@ -8,6 +9,7 @@ const keyMap = {
   k: (ctx: LizardContext) => moveVertical(ctx, -1),
   g: (ctx: LizardContext) => jump(ctx),
   r: (ctx: LizardContext) => replaceNode(ctx),
+  s: (ctx: LizardContext) => swapSiblingNodes(ctx),
 };
 
 export async function createLizardModeState(ctx: LizardContext) {
