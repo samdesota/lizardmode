@@ -39,8 +39,6 @@ export async function moveVertical(ctx: LizardContext, by: number) {
   const currentNode = ctx.getCurrentNode();
   const direction: Direction = by > 0 ? 1 : -1;
 
-  console.log("moveVertical", currentNode);
-
   if (!currentNode) {
     return;
   }

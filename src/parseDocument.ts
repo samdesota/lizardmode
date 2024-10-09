@@ -73,5 +73,9 @@ export function applyEditsAndParseDocument(
     });
   });
 
-  return parser.parse(getChunkFromIndex.bind(null, document), tree);
+  return parser.parse(
+    getChunkFromIndex.bind(null, document),
+    // HACK re-parse the whole document for now
+    //tree
+  );
 }

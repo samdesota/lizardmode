@@ -35,13 +35,20 @@ export interface LizardContext {
   readInput(): Promise<string>;
   jumpTo(node: TreeSitterNode): void;
   showHints(hints: { node: TreeSitterNode; hint: string }[]): void;
+  insertSnippet(
+    start: TreeSitterPoint,
+    end: TreeSitterPoint,
+    text: string[],
+  ): Promise<void>;
   edit(
     edits: {
       start: TreeSitterPoint;
       end: TreeSitterPoint;
+      removeWhenEmpty?: boolean;
       text: string;
     }[],
-  ): void;
+  ): Promise<void>;
+  exitLizardMode(mode?: "insert" | "normal"): void;
 }
 
 export interface LizardTransaction {

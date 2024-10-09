@@ -32,7 +32,20 @@ export class CodeLizardContext implements LizardContext {
     public language: TreeSitterLanguage,
     public readInput: () => Promise<string>,
     private editor: vscode.TextEditor,
+    private cancel: vscode.EventEmitter<void>,
   ) {}
+
+  exitLizardMode(mode?: "insert" | "normal"): void {
+    this.cancel.fire();
+
+    if (mode === "insert") {
+      // trigger vim mode insert
+      vscode.commands.executeCommand("vim.editors.insertMode");
+    } else if (mode === "normal") {
+      // trigger vim mode normal
+      vscode.commands.executeCommand("vim.editors.normalMode");
+    }
+  }
 
   getCursor(): TreeSitterPoint | null {
     const cursor = this.editor.selection.active;
@@ -109,10 +122,25 @@ export class CodeLizardContext implements LizardContext {
     });
   }
 
+  async insertSnippet(
+    start: TreeSitterPoint,
+    end: TreeSitterPoint,
+    snippet: string[],
+  ): Promise<void> {
+    await this.edit([
+      {
+        start,
+        end,
+        text: snippet.join("\n"),
+      },
+    ]);
+  }
+
   async edit(
     edits: {
       start: TreeSitterPoint;
       end: TreeSitterPoint;
+      removeWhenEmpty?: boolean;
       text: string;
     }[],
   ): Promise<void> {
@@ -124,8 +152,33 @@ export class CodeLizardContext implements LizardContext {
 
     await this.editor.edit((editBuilder) => {
       for (const edit of edits) {
-        const range = toVscodeRange(edit.start, edit.end);
-        editBuilder.replace(range, edit.text);
+        if (edit.removeWhenEmpty && edit.text === "") {
+          const lastLine = this.editor.document.lineAt(edit.end.row);
+          const lastLineRemaining = lastLine.text.slice(edit.end.column);
+
+          const firstLine = this.editor.document.lineAt(edit.start.row);
+          const firstLineRemaining = firstLine.text.slice(0, edit.start.column);
+
+          const range = toVscodeRange(
+            firstLineRemaining.trim() === ""
+              ? {
+                  row: edit.start.row,
+                  column: 0,
+                }
+              : edit.start,
+            lastLineRemaining.trim() === ""
+              ? {
+                  row: edit.end.row + 1,
+                  column: 0,
+                }
+              : edit.end,
+          );
+
+          editBuilder.delete(range);
+        } else {
+          const range = toVscodeRange(edit.start, edit.end);
+          editBuilder.replace(range, edit.text);
+        }
       }
     });
 

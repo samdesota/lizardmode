@@ -16,6 +16,16 @@ class TestContext implements LizardContext {
     public language: Parser.Language,
     public parser: Parser,
   ) {}
+  insertSnippet(
+    start: TreeSitterPoint,
+    end: TreeSitterPoint,
+    text: string[],
+  ): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  exitLizardMode(mode?: "insert" | "normal"): void {
+    throw new Error("Method not implemented.");
+  }
 
   getCursor(): TreeSitterPoint | null {
     throw new Error("Method not implemented.");
@@ -36,8 +46,13 @@ class TestContext implements LizardContext {
     throw new Error("Method not implemented.");
   }
   edit(
-    edits: { start: TreeSitterPoint; end: TreeSitterPoint; text: string }[],
-  ): void {
+    edits: {
+      start: TreeSitterPoint;
+      removeWhenEmpty: boolean;
+      end: TreeSitterPoint;
+      text: string;
+    }[],
+  ): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }
@@ -112,7 +127,7 @@ describe("CursorNodeManager", () => {
         {
           start: 0,
           end: lines[0].length,
-          delta: 5,
+          text: "bars",
         },
       ]);
 
@@ -145,7 +160,7 @@ describe("CursorNodeManager", () => {
         {
           start: lastLine.startIndex,
           end: lastLine.endIndex,
-          delta: 5,
+          text: "foods",
         },
       ]);
 
@@ -171,7 +186,7 @@ describe("CursorNodeManager", () => {
         {
           start: secondLine.startIndex + 1,
           end: secondLine.endIndex - 1,
-          delta: 1,
+          text: "t",
         },
       ]);
 
@@ -197,7 +212,7 @@ describe("CursorNodeManager", () => {
         {
           start: secondLine.startIndex,
           end: secondLine.endIndex,
-          delta: 5,
+          text: "bars;",
         },
       ]);
 

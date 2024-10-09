@@ -6,8 +6,10 @@ const options = {
   "{": (code: string) => [`{${code}}`],
   "'": (code: string) => [`'${code}'`],
   '"': (code: string) => [`"${code}"`],
-  "`": (code: string) => ["`", code, "`"],
-  i: (code: string) => ["if (${1:condition}) {", code, "}"],
+  "`": (code: string) => [`\`${code}\``],
+  i: (code: string) => ["if (condition) {", code, "}"],
+  f: (code: string) => ["function name() {", code, "}"],
+  a: (code: string) => [`() => ${code}`],
 };
 
 export async function wrapNode(ctx: LizardContext) {
@@ -27,5 +29,9 @@ export async function wrapNode(ctx: LizardContext) {
   const code = currentNode.text;
   const snippet = wrap(code);
 
-  //await ctx.insertSnippet(snippet);
+  await ctx.insertSnippet(
+    currentNode.startPosition,
+    currentNode.endPosition,
+    snippet,
+  );
 }

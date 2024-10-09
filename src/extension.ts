@@ -1,6 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as TreeSitterWasm from "@vscode/tree-sitter-wasm";
 import * as vscode from "vscode";
 import { CodeLizardContext } from "./CodeLizardContext";
 import { debug } from "./debug";
@@ -8,12 +5,9 @@ import { createLizardModeState } from "./lizardMode";
 import { initializeParser, TreeSitter } from "./treeSitter";
 import { bindings } from "./scripts/keys";
 import { applyEditsAndParseDocument, parseDocument } from "./parseDocument";
+import { focusedDecoratorType } from "./vscodeBridge";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
   debug(__filename, "initializing lizard mode extension");
 
   let extensionDisposed = false;
@@ -41,27 +35,6 @@ export function activate(context: vscode.ExtensionContext) {
       "typescriptreact",
       "javascriptreact",
     ];
-
-    function getChunkFromIndex(
-      document: vscode.TextDocument,
-      offset: number,
-    ): string {
-      const position = document.positionAt(offset);
-      const line = document.lineAt(position.line);
-
-      if (position.character === line.text.length) {
-        // if at end of document
-        if (position.line === document.lineCount - 1) {
-          return "";
-        }
-
-        const nextLine = document.lineAt(position.line + 1);
-
-        return "\n" + nextLine.text;
-      }
-
-      return line.text.slice(position.character);
-    }
 
     let handleType:
       | null
@@ -122,6 +95,18 @@ export function activate(context: vscode.ExtensionContext) {
           "lizardmode.capture",
           true,
         );
+        subscriptions.push(
+          new vscode.Disposable(() => {
+            vscode.commands.executeCommand(
+              "setContext",
+              "lizardmode.capture",
+              false,
+            );
+
+            editor.setDecorations(focusedDecoratorType, []);
+          }),
+        );
+
         try {
           const lizardContext = new CodeLizardContext(
             TreeSitter,
@@ -150,10 +135,12 @@ export function activate(context: vscode.ExtensionContext) {
               });
             },
             editor,
+            cancelEmitter,
           );
 
           subscriptions.push(
             vscode.workspace.onDidChangeTextDocument((event) => {
+              console.log("content changes", event.contentChanges);
               if (event.document === editor.document) {
                 const newTree = applyEditsAndParseDocument(
                   parser,
@@ -190,26 +177,17 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     addDisposable(
-      vscode.window.onDidChangeActiveTextEditor((editor) => {
-        if (editor) {
-          startLizardMode(editor);
-        } else {
-          console.log("No active editor");
-        }
-      }),
-    );
-
-    addDisposable(
       vscode.commands.registerCommand("lizardmode.enter", () => {
-        if (vscode.window.activeTextEditor) {
+        if (
+          vscode.window.activeTextEditor &&
+          supportedLanguages.includes(
+            vscode.window.activeTextEditor.document.languageId,
+          )
+        ) {
           startLizardMode(vscode.window.activeTextEditor);
         }
       }),
     );
-
-    if (vscode.window.activeTextEditor) {
-      startLizardMode(vscode.window.activeTextEditor);
-    }
   });
 }
 

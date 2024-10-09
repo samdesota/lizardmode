@@ -51,6 +51,10 @@ const jumpTypes = {
     query: `(statement) @target`,
   },
 
+  expresion: {
+    query: `(expression) @target`,
+  },
+
   function: {
     query: `(function_declaration) @target`,
   },
@@ -62,6 +66,10 @@ const jumpTypes = {
   assignment: {
     query: `(assignment) @target`,
   },
+
+  type: {
+    query: `(primary_type) @target`,
+  },
 };
 
 const jumpMap: Record<string, keyof typeof jumpTypes> = {
@@ -70,6 +78,8 @@ const jumpMap: Record<string, keyof typeof jumpTypes> = {
   f: "function",
   i: "identifier",
   a: "assignment",
+  e: "expresion",
+  t: "type",
 };
 
 export async function requestStatementType(ctx: LizardContext) {
