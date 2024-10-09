@@ -15,6 +15,8 @@ const typescriptWasm = path.join(
 export const TreeSitter: typeof TreeSitterWasm.Parser = (TreeSitterWasm as any)
   .default;
 
+export type TreeSitterParser = TreeSitterWasm.Parser;
+
 export type TreeSitterLanguage = TreeSitterWasm.Parser.Language;
 
 export type TreeSitterTree = ReturnType<TreeSitterWasm.Parser["parse"]>;

@@ -7,6 +7,7 @@ import { debug } from "./debug";
 import { createLizardModeState } from "./lizardMode";
 import { initializeParser, TreeSitter } from "./treeSitter";
 import { bindings } from "./scripts/keys";
+import { applyEditsAndParseDocument, parseDocument } from "./parseDocument";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -14,8 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   debug(__filename, "initializing lizard mode extension");
-
-  const parsers = new Map<string, ReturnType<TreeSitterWasm.Parser["parse"]>>();
 
   let extensionDisposed = false;
 
@@ -33,10 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  let handleType:
-    | null
-    | ((args: { text: string }) => void | { preventDefault: boolean }) = null;
-
   initializeParser().then(async ({ parser, language: jsLanguage }) => {
     debug(__filename, "initialized parser");
 
@@ -47,82 +42,37 @@ export function activate(context: vscode.ExtensionContext) {
       "javascriptreact",
     ];
 
-    const initializeDocumentTree = (document: vscode.TextDocument) => {
-      if (!supportedLanguages.includes(document.languageId)) {
-        return;
+    function getChunkFromIndex(
+      document: vscode.TextDocument,
+      offset: number,
+    ): string {
+      const position = document.positionAt(offset);
+      const line = document.lineAt(position.line);
+
+      if (position.character === line.text.length) {
+        // if at end of document
+        if (position.line === document.lineCount - 1) {
+          return "";
+        }
+
+        const nextLine = document.lineAt(position.line + 1);
+
+        return "\n" + nextLine.text;
       }
 
-      if (parsers.has(document.uri.toString())) {
-        return parsers.get(document.uri.toString());
-      }
-      const tree = parser.parse(document.getText());
-      parsers.set(document.uri.toString(), tree);
-      return tree;
-    };
+      return line.text.slice(position.character);
+    }
 
-    addDisposable(
-      vscode.workspace.onDidChangeTextDocument((event) => {
-        const uri = event.document.uri.toString();
-
-        if (parsers.has(uri)) {
-          const tree = parsers.get(uri);
-
-          if (tree) {
-            event.contentChanges.forEach((change) => {
-              const oldStartPos = change.range.start;
-              const oldEndPos = change.range.end;
-              const newText = change.text;
-
-              // Calculate the byte offsets
-              const startIndex = event.document.offsetAt(oldStartPos);
-              const oldEndIndex = event.document.offsetAt(oldEndPos);
-              const newEndIndex =
-                startIndex + Buffer.byteLength(newText, "utf-16le");
-
-              tree.edit({
-                startIndex,
-                oldEndIndex,
-                newEndIndex,
-                startPosition: {
-                  row: oldStartPos.line,
-                  column: oldStartPos.character,
-                },
-                oldEndPosition: {
-                  row: oldEndPos.line,
-                  column: oldEndPos.character,
-                },
-                newEndPosition: {
-                  row: oldStartPos.line + (newText.split(/\r?\n/).length - 1),
-                  column: newText.endsWith("\n") ? 0 : newText.length, // Column at the end of the inserted text
-                },
-              });
-            });
-
-            const newTree = parser.parse(event.document.getText());
-
-            parsers.set(uri, newTree);
-          }
-        }
-      }),
-    );
-
-    addDisposable(
-      vscode.workspace.onDidCloseTextDocument((document) => {
-        const uri = document.uri.toString();
-
-        if (parsers.has(uri)) {
-          parsers.get(uri)?.delete();
-          parsers.delete(uri);
-        }
-      }),
-    );
+    let handleType:
+      | null
+      | ((args: { text: string }) => void | { preventDefault: boolean }) = null;
 
     addDisposable(
       vscode.Disposable.from(
         ...bindings.map((binding) =>
           vscode.commands.registerCommand(binding.command, () => {
             if (handleType) {
-              handleType({ text: binding.key });
+              handleType({ text: binding.typedKey });
             }
           }),
         ),
@@ -144,9 +94,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     async function startLizardMode(editor: vscode.TextEditor) {
       console.log("starting lizard mode");
-      const tree = initializeDocumentTree(editor.document);
+      const tree = parseDocument(parser, editor.document);
+
       if (tree) {
         let cancelled = false;
+
+        const subscriptions: vscode.Disposable[] = [];
 
         if (cancelEmitter) {
           console.log("cancelling lizard mode");
@@ -155,13 +108,13 @@ export function activate(context: vscode.ExtensionContext) {
 
         cancelEmitter = new vscode.EventEmitter();
 
+        function cleanup() {
+          subscriptions.forEach((sub) => sub.dispose());
+        }
+
         cancelEmitter.event(() => {
           cancelled = true;
-          vscode.commands.executeCommand(
-            "setContext",
-            "lizardmode.capture",
-            false,
-          );
+          cleanup();
         });
 
         vscode.commands.executeCommand(
@@ -172,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
         try {
           const lizardContext = new CodeLizardContext(
             TreeSitter,
-            parsers,
+            tree,
             jsLanguage,
             async () => {
               return new Promise<string>((resolve, reject) => {
@@ -199,6 +152,28 @@ export function activate(context: vscode.ExtensionContext) {
             editor,
           );
 
+          subscriptions.push(
+            vscode.workspace.onDidChangeTextDocument((event) => {
+              if (event.document === editor.document) {
+                const newTree = applyEditsAndParseDocument(
+                  parser,
+                  editor.document,
+                  event.contentChanges,
+                  lizardContext.tree,
+                );
+
+                lizardContext.handleEdits(
+                  newTree,
+                  event.contentChanges.map((change) => ({
+                    start: change.rangeOffset,
+                    end: change.rangeOffset + change.rangeLength,
+                    text: change.text,
+                  })),
+                );
+              }
+            }),
+          );
+
           await createLizardModeState(lizardContext);
         } catch (e) {
           if (e instanceof CancelToken) {
@@ -208,11 +183,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
         } finally {
           if (!cancelled) {
-            vscode.commands.executeCommand(
-              "setContext",
-              "lizardmode.capture",
-              false,
-            );
+            cleanup();
           }
         }
       }

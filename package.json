@@ -265,6 +265,241 @@
         "key": "/",
         "command": "lizard.type.code_47",
         "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+`",
+        "command": "lizard.type.code_shift_96",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+1",
+        "command": "lizard.type.code_shift_49",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+2",
+        "command": "lizard.type.code_shift_50",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+3",
+        "command": "lizard.type.code_shift_51",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+4",
+        "command": "lizard.type.code_shift_52",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+5",
+        "command": "lizard.type.code_shift_53",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+6",
+        "command": "lizard.type.code_shift_54",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+7",
+        "command": "lizard.type.code_shift_55",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+8",
+        "command": "lizard.type.code_shift_56",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+9",
+        "command": "lizard.type.code_shift_57",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+0",
+        "command": "lizard.type.code_shift_48",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+-",
+        "command": "lizard.type.code_shift_45",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+=",
+        "command": "lizard.type.code_shift_61",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+q",
+        "command": "lizard.type.code_shift_113",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+w",
+        "command": "lizard.type.code_shift_119",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+e",
+        "command": "lizard.type.code_shift_101",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+r",
+        "command": "lizard.type.code_shift_114",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+t",
+        "command": "lizard.type.code_shift_116",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+y",
+        "command": "lizard.type.code_shift_121",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+u",
+        "command": "lizard.type.code_shift_117",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+i",
+        "command": "lizard.type.code_shift_105",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+o",
+        "command": "lizard.type.code_shift_111",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+p",
+        "command": "lizard.type.code_shift_112",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+[",
+        "command": "lizard.type.code_shift_91",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+]",
+        "command": "lizard.type.code_shift_93",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+\\",
+        "command": "lizard.type.code_shift_92",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+a",
+        "command": "lizard.type.code_shift_97",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+s",
+        "command": "lizard.type.code_shift_115",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+d",
+        "command": "lizard.type.code_shift_100",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+f",
+        "command": "lizard.type.code_shift_102",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+g",
+        "command": "lizard.type.code_shift_103",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+h",
+        "command": "lizard.type.code_shift_104",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+j",
+        "command": "lizard.type.code_shift_106",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+k",
+        "command": "lizard.type.code_shift_107",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+l",
+        "command": "lizard.type.code_shift_108",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+;",
+        "command": "lizard.type.code_shift_59",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+'",
+        "command": "lizard.type.code_shift_39",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+z",
+        "command": "lizard.type.code_shift_122",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+x",
+        "command": "lizard.type.code_shift_120",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+c",
+        "command": "lizard.type.code_shift_99",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+v",
+        "command": "lizard.type.code_shift_118",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+b",
+        "command": "lizard.type.code_shift_98",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+n",
+        "command": "lizard.type.code_shift_110",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+m",
+        "command": "lizard.type.code_shift_109",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+,",
+        "command": "lizard.type.code_shift_44",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+.",
+        "command": "lizard.type.code_shift_46",
+        "when": "editorTextFocus && lizardmode.capture"
+      },
+      {
+        "key": "shift+/",
+        "command": "lizard.type.code_shift_47",
+        "when": "editorTextFocus && lizardmode.capture"
       }
     ]
   },

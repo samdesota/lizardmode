@@ -1,14 +1,23 @@
 import { LizardContext } from "../stateContexts";
+import { moveVertical, nextSibling } from "./navigation";
 
-export const swapSiblingNodes = async (ctx: LizardContext) => {
+export const swapSiblingNodes = async (
+  ctx: LizardContext,
+  direction: 1 | -1,
+) => {
   const currentNode = ctx.getCurrentNode();
-  const siblingNode = currentNode?.nextNamedSibling;
 
-  if (!currentNode || !siblingNode) {
+  if (!currentNode) {
     return;
   }
 
-  ctx.edit([
+  const siblingNode = nextSibling(direction, currentNode);
+
+  if (!siblingNode) {
+    return;
+  }
+
+  await ctx.edit([
     {
       start: currentNode.startPosition,
       end: currentNode.endPosition,
@@ -20,4 +29,8 @@ export const swapSiblingNodes = async (ctx: LizardContext) => {
       text: currentNode.text,
     },
   ]);
+
+  console.log("Swapped nodes");
+
+  await moveVertical(ctx, direction);
 };

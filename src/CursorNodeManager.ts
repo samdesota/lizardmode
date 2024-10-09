@@ -8,8 +8,6 @@ export function findNodeByPosition(
 ): TreeSitterNode | null {
   let currentNode = tree.rootNode;
 
-  console.log("findNodeByPosition", startIndex, endIndex);
-
   while (true) {
     const child = currentNode.namedChildren.find((child) => {
       return child.startIndex <= startIndex && child.endIndex >= endIndex;
@@ -20,7 +18,6 @@ export function findNodeByPosition(
     }
 
     if (child.startIndex === startIndex && child.endIndex === endIndex) {
-      console.log("findNodeByPosition: child found", child.startIndex);
       return child;
     }
 
@@ -47,7 +44,7 @@ export class CursorNodeManager {
     edits: {
       start: number;
       end: number;
-      delta: number;
+      text: string;
     }[],
   ) {
     if (!this.cursorNode || !this.cursorStart || !this.cursorEnd) {
@@ -56,34 +53,28 @@ export class CursorNodeManager {
     let startDelta = 0;
     let endDelta = 0;
     for (const edit of edits) {
-      console.log(
-        "handleEdits",
-        edit.start,
-        edit.end,
-        edit.delta,
-        this.cursorStart,
-        this.cursorEnd,
-      );
+      const newLength = edit.text.length;
 
       // if edit is outside of the node
       if (edit.end < this.cursorStart || edit.start > this.cursorEnd) {
         if (edit.start < this.cursorStart) {
-          startDelta += edit.delta - (edit.end - edit.start);
-          endDelta += edit.delta - (edit.end - edit.start);
+          startDelta += newLength - (edit.end - edit.start);
+          endDelta += newLength - (edit.end - edit.start);
         }
         // if edit is after the node, do nothing
         continue;
       } else if (edit.start >= this.cursorStart && edit.end <= this.cursorEnd) {
         // if edit is inside the node, update the end position
-        endDelta += edit.delta - (edit.end - edit.start);
+        endDelta += newLength - (edit.end - edit.start);
         continue;
       } else {
         // if edit is partially inside the node, invalidate the node
-        console.log("invalidate node");
         this.setCurrentNode(null);
         break;
       }
     }
+
+    console.log("CursorNodeManager handleEdits", startDelta, endDelta);
 
     this.cursorStart += startDelta;
     this.cursorEnd += endDelta;
@@ -91,10 +82,18 @@ export class CursorNodeManager {
 
   getCurrentNode() {
     if (this.context.tree !== this.cursorTree) {
+      console.log("Tree changed, recalculating cursor node");
       const newTreeNode = findNodeByPosition(
         this.context.tree,
         this.cursorStart!,
         this.cursorEnd!,
+      );
+
+      console.log(
+        "New cursor node",
+        newTreeNode,
+        this.cursorStart,
+        this.cursorEnd,
       );
 
       this.setCurrentNode(newTreeNode);

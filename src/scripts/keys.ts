@@ -6,6 +6,14 @@ export const lowerCaseKeys = [
   "z", "x", "c", "v", "b", "n", "m", ",", ".", "/",
 ]
 
+// prettier-ignore
+export const upperCaseKeys = [
+  "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+",
+  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|",
+  "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"",
+  "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?",
+]
+
 export const nonCharacterKeys = [
   "Enter",
   "Tab",
@@ -14,8 +22,16 @@ export const nonCharacterKeys = [
   "Space",
 ];
 
-export const bindings = lowerCaseKeys.map((key) => ({
-  key,
-  command: `lizard.type.code_${key.charCodeAt(0)}`,
-  when: "editorTextFocus && lizardmode.capture",
-}));
+export const bindings = [
+  ...lowerCaseKeys.map((key) => ({
+    key,
+    typedKey: key,
+    command: `lizard.type.code_${key.charCodeAt(0)}`,
+  })),
+
+  ...lowerCaseKeys.map((key) => ({
+    key: "shift+" + key,
+    typedKey: upperCaseKeys[lowerCaseKeys.indexOf(key)],
+    command: `lizard.type.code_shift_${key.charCodeAt(0)}`,
+  })),
+];

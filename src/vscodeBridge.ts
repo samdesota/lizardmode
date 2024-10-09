@@ -50,7 +50,9 @@ export function getRangesWithoutInitialWhitespace(
       range.start.line,
       range.start.character,
       range.start.line,
-      firstLine.range.end.character,
+      range.end.line === range.start.line
+        ? range.end.character
+        : firstLine.range.end.character,
     ),
   ];
 

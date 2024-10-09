@@ -17,18 +17,22 @@ import { CursorNodeManager } from "./CursorNodeManager";
 
 export class CodeLizardContext implements LizardContext {
   private cursorNodeManager = new CursorNodeManager(this);
+  private onEdit = new vscode.EventEmitter<{
+    newTree: TreeSitterTree;
+    edits: {
+      start: number;
+      end: number;
+      text: string;
+    }[];
+  }>();
 
   constructor(
     public treeSitter: typeof TreeSitter,
-    public trees: Map<string, TreeSitterTree>,
+    public tree: TreeSitterTree,
     public language: TreeSitterLanguage,
     public readInput: () => Promise<string>,
     private editor: vscode.TextEditor,
   ) {}
-
-  get tree() {
-    return this.trees.get(this.editor.document.uri.toString())!;
-  }
 
   getCursor(): TreeSitterPoint | null {
     const cursor = this.editor.selection.active;
@@ -87,31 +91,44 @@ export class CodeLizardContext implements LizardContext {
     );
   }
 
-  edit(
+  handleEdits(
+    newTree: TreeSitterTree,
+    edits: {
+      start: number;
+      end: number;
+      text: string;
+    }[],
+  ): void {
+    this.tree = newTree;
+
+    this.cursorNodeManager.handleEdits(edits);
+
+    this.onEdit.fire({
+      newTree,
+      edits,
+    });
+  }
+
+  async edit(
     edits: {
       start: TreeSitterPoint;
       end: TreeSitterPoint;
       text: string;
     }[],
-  ): void {
-    this.cursorNodeManager.handleEdits(
-      edits.map((edit) => {
-        return {
-          start: this.editor.document.offsetAt(
-            new vscode.Position(edit.start.row, edit.start.column),
-          ),
-          end: this.editor.document.offsetAt(
-            new vscode.Position(edit.end.row, edit.end.column),
-          ),
-          delta: edit.text.length,
-        };
-      }),
-    );
-    this.editor.edit((editBuilder) => {
+  ): Promise<void> {
+    const editPromise = new Promise<void>((resolve) => {
+      this.onEdit.event(() => {
+        resolve();
+      });
+    });
+
+    await this.editor.edit((editBuilder) => {
       for (const edit of edits) {
         const range = toVscodeRange(edit.start, edit.end);
         editBuilder.replace(range, edit.text);
       }
     });
+
+    await editPromise;
   }
 }
