@@ -33,12 +33,14 @@ export interface LizardContext {
   getCurrentNode(): TreeSitterNode | null;
   isRangeVisible(start: TreeSitterPoint, end: TreeSitterPoint): boolean;
   readInput(): Promise<string>;
+  getLine(n: number): string;
   jumpTo(node: TreeSitterNode): void;
+  getIndentation(): string;
   showHints(hints: { node: TreeSitterNode; hint: string }[]): void;
   insertSnippet(
     start: TreeSitterPoint,
     end: TreeSitterPoint,
-    text: string[],
+    text: string,
   ): Promise<void>;
   edit(
     edits: {

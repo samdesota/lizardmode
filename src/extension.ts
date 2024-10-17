@@ -6,6 +6,7 @@ import { initializeParser, TreeSitter } from "./treeSitter";
 import { bindings } from "./scripts/keys";
 import { applyEditsAndParseDocument, parseDocument } from "./parseDocument";
 import { focusedDecoratorType } from "./vscodeBridge";
+import { goToNodeAtCursor } from "./commands/navigation";
 
 export function activate(context: vscode.ExtensionContext) {
   debug(__filename, "initializing lizard mode extension");
@@ -75,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
         const subscriptions: vscode.Disposable[] = [];
 
         if (cancelEmitter) {
-          console.log("cancelling lizard mode");
+          console.log("canceling previous izard mode");
           cancelEmitter.fire();
         }
 
@@ -86,6 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         cancelEmitter.event(() => {
+          console.log("cancel lizard mode fired");
           cancelled = true;
           cleanup();
         });
@@ -161,6 +163,7 @@ export function activate(context: vscode.ExtensionContext) {
             }),
           );
 
+          await goToNodeAtCursor(lizardContext);
           await createLizardModeState(lizardContext);
         } catch (e) {
           if (e instanceof CancelToken) {

@@ -35,16 +35,31 @@ export class CodeLizardContext implements LizardContext {
     private cancel: vscode.EventEmitter<void>,
   ) {}
 
-  exitLizardMode(mode?: "insert" | "normal"): void {
+  async exitLizardMode(mode?: "insert" | "normal") {
+    console.log("exiting lizard mode");
     this.cancel.fire();
 
     if (mode === "insert") {
       // trigger vim mode insert
-      vscode.commands.executeCommand("vim.editors.insertMode");
+      vscode.commands.executeCommand("extension.vim_insert");
     } else if (mode === "normal") {
       // trigger vim mode normal
-      vscode.commands.executeCommand("vim.editors.normalMode");
+      //  vscode.commands.executeCommand("vim.editors.normalMode");
     }
+  }
+
+  getIndentation() {
+    const tabSize = this.editor.options.tabSize;
+
+    if (typeof tabSize === "number") {
+      return " ".repeat(tabSize);
+    }
+
+    return tabSize ?? "  ";
+  }
+
+  getLine(n: number): string {
+    return this.editor.document.lineAt(n).text;
   }
 
   getCursor(): TreeSitterPoint | null {
@@ -125,13 +140,13 @@ export class CodeLizardContext implements LizardContext {
   async insertSnippet(
     start: TreeSitterPoint,
     end: TreeSitterPoint,
-    snippet: string[],
+    snippet: string,
   ): Promise<void> {
     await this.edit([
       {
         start,
         end,
-        text: snippet.join("\n"),
+        text: snippet,
       },
     ]);
   }
