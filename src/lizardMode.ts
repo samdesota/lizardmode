@@ -1,3 +1,4 @@
+import { createNode } from "./commands/createNode";
 import { deleteNode } from "./commands/deleteNode";
 import { moveVertical } from "./commands/navigation";
 import { replaceNode } from "./commands/replaceNode";
@@ -18,6 +19,8 @@ const keyMap = {
   w: (ctx: LizardContext) => wrapNode(ctx),
   d: (ctx: LizardContext) => deleteNode(ctx),
   c: (ctx: LizardContext) => deleteNode(ctx, { enterInsertMode: true }),
+  a: (ctx: LizardContext) => createNode(ctx, { position: "after" }),
+  A: (ctx: LizardContext) => createNode(ctx, { position: "before" }),
 };
 
 export async function createLizardModeState(ctx: LizardContext) {

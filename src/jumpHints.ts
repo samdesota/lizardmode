@@ -70,6 +70,10 @@ const jumpTypes = {
   type: {
     query: `(primary_type) @target`,
   },
+
+  jsxElement: {
+    query: `(jsx_element) @target`,
+  },
 };
 
 const jumpMap: Record<string, keyof typeof jumpTypes> = {
@@ -80,6 +84,7 @@ const jumpMap: Record<string, keyof typeof jumpTypes> = {
   a: "assignment",
   e: "expresion",
   t: "type",
+  j: "jsxElement",
 };
 
 export async function requestStatementType(ctx: LizardContext) {

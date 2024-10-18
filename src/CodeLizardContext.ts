@@ -36,7 +36,6 @@ export class CodeLizardContext implements LizardContext {
   ) {}
 
   async exitLizardMode(mode?: "insert" | "normal") {
-    console.log("exiting lizard mode");
     this.cancel.fire();
 
     if (mode === "insert") {
@@ -44,7 +43,7 @@ export class CodeLizardContext implements LizardContext {
       vscode.commands.executeCommand("extension.vim_insert");
     } else if (mode === "normal") {
       // trigger vim mode normal
-      //  vscode.commands.executeCommand("vim.editors.normalMode");
+      vscode.commands.executeCommand("extension.vim_escape");
     }
   }
 

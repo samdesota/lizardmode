@@ -16,10 +16,16 @@ class TestContext implements LizardContext {
     public language: Parser.Language,
     public parser: Parser,
   ) {}
+  getLine(n: number): string {
+    throw new Error("Method not implemented.");
+  }
+  getIndentation(): string {
+    throw new Error("Method not implemented.");
+  }
   insertSnippet(
     start: TreeSitterPoint,
     end: TreeSitterPoint,
-    text: string[],
+    text: string,
   ): Promise<void> {
     throw new Error("Method not implemented.");
   }
