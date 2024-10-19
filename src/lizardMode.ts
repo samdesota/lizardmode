@@ -5,7 +5,7 @@ import { replaceNode } from "./commands/replaceNode";
 import { swapSiblingNodes } from "./commands/swapNodes";
 import { jump, jumpToParent } from "./jumpHints";
 import { LizardContext } from "./stateContexts";
-import { wrapNode } from "./wrapNode";
+import { unwrapNode, wrapNode } from "./wrapNode";
 
 const keyMap = {
   j: (ctx: LizardContext) => moveVertical(ctx, 1),
@@ -17,6 +17,7 @@ const keyMap = {
   r: (ctx: LizardContext) => replaceNode(ctx),
   g: (ctx: LizardContext) => jump(ctx),
   w: (ctx: LizardContext) => wrapNode(ctx),
+  W: (ctx: LizardContext) => unwrapNode(ctx),
   d: (ctx: LizardContext) => deleteNode(ctx),
   c: (ctx: LizardContext) => deleteNode(ctx, { enterInsertMode: true }),
   a: (ctx: LizardContext) => createNode(ctx, { position: "after" }),

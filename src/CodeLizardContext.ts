@@ -141,6 +141,9 @@ export class CodeLizardContext implements LizardContext {
     end: TreeSitterPoint,
     snippet: string,
   ): Promise<void> {
+    const newCursorStartOffsetStart = snippet.match(/^[\s]+/)?.[0].length ?? 0;
+    const newCursorStartOffsetEnd = snippet.match(/[\s]+$/)?.[0].length ?? 0;
+
     await this.edit([
       {
         start,
@@ -148,6 +151,20 @@ export class CodeLizardContext implements LizardContext {
         text: snippet,
       },
     ]);
+
+    const startOffset = this.editor.document.offsetAt(
+      new vscode.Position(start.row, start.column),
+    );
+    this.cursorNodeManager.cursorStart =
+      startOffset + newCursorStartOffsetStart;
+    this.cursorNodeManager.cursorEnd =
+      startOffset + snippet.length - newCursorStartOffsetEnd;
+
+    const currentNode = this.cursorNodeManager.getCurrentNode();
+
+    if (currentNode) {
+      this.jumpTo(currentNode);
+    }
   }
 
   async edit(
@@ -195,6 +212,8 @@ export class CodeLizardContext implements LizardContext {
         }
       }
     });
+
+    await vscode.commands.executeCommand("editor.action.formatDocument");
 
     await editPromise;
   }
