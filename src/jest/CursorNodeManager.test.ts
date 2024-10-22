@@ -63,7 +63,7 @@ class TestContext implements LizardContext {
   }
 }
 
-const treeSitterInit = initializeParser();
+const treeSitterInit = initializeParser("tsx");
 const getContext = async (doc: string) => {
   const { language, parser } = await treeSitterInit;
 
