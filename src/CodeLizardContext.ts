@@ -14,6 +14,7 @@ import {
   toVscodeRange,
 } from "./vscodeBridge";
 import { CursorNodeManager } from "./CursorNodeManager";
+import { Lifecycle } from "./lifecycle";
 
 export class CodeLizardContext implements LizardContext {
   private cursorNodeManager = new CursorNodeManager(this);
@@ -32,11 +33,11 @@ export class CodeLizardContext implements LizardContext {
     public language: TreeSitterLanguage,
     public readInput: () => Promise<string>,
     private editor: vscode.TextEditor,
-    private cancel: vscode.EventEmitter<void>,
+    private lifecycle: Lifecycle,
   ) {}
 
   exitLizardMode(mode?: "insert" | "normal"): void {
-    this.cancel.fire();
+    this.lifecycle.cancel();
 
     if (mode === "insert") {
       // trigger vim mode insert
