@@ -49,3 +49,17 @@ export async function moveVertical(ctx: LizardContext, by: number) {
     ctx.jumpTo(nextNode);
   }
 }
+
+export async function goToNodeAtCursor(ctx: LizardContext) {
+  const cursorPosition = ctx.getCursor();
+
+  if (!cursorPosition) {
+    return;
+  }
+
+  const node = ctx.tree.rootNode.namedDescendantForPosition(cursorPosition);
+
+  if (node) {
+    ctx.jumpTo(node);
+  }
+}

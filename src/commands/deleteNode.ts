@@ -11,11 +11,11 @@ export const deleteNode = async (
     return;
   }
 
-  if (options.enterInsertMode) {
+  if (!options.enterInsertMode) {
     const nextNode = findNextNodeVertically(1, currentNode);
 
     if (nextNode) {
-      ctx.jumpTo(nextNode);
+      await ctx.jumpTo(nextNode);
     }
   }
 
@@ -29,6 +29,9 @@ export const deleteNode = async (
   ]);
 
   if (options.enterInsertMode) {
-    ctx.exitLizardMode("insert");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+    await ctx.exitLizardMode("insert");
   }
 };
