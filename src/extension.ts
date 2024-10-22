@@ -6,6 +6,7 @@ import { initializeParser, TreeSitter } from "./treeSitter";
 import { bindings } from "./scripts/keys";
 import { applyEditsAndParseDocument, parseDocument } from "./parseDocument";
 import { focusedDecoratorType } from "./vscodeBridge";
+import { Lifecycle } from "./lifecycle";
 import { goToNodeAtCursor } from "./commands/navigation";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -53,11 +54,14 @@ export function activate(context: vscode.ExtensionContext) {
   addDisposable(
     vscode.commands.registerCommand("lizardmode.leave", () => {
       console.log("leaving lizard mode");
-      cancelEmitter.fire();
+
+      if (lizardLifecycle) {
+        lizardLifecycle.cancel();
+      }
     }),
   );
 
-  let cancelEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter();
+  let lizardLifecycle: Lifecycle | null = null;
 
   class CancelToken {
     public message: string = "cancelled";
@@ -65,44 +69,45 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function startLizardMode(editor: vscode.TextEditor) {
     console.log("starting lizard mode");
-    const lang = editor.document.languageId;
     const { parser, language } = await initializeParser(
-      lang === "typescript" ? "typescript" : "tsx",
+      editor.document.languageId.endsWith("react") ? "tsx" : "typescript",
     );
     const tree = parseDocument(parser, editor.document);
 
     if (tree) {
+      const lifecycle = new Lifecycle();
+
       let cancelled = false;
 
-      const subscriptions: vscode.Disposable[] = [];
-
-      if (cancelEmitter) {
-        console.log("canceling previous izard mode");
-        cancelEmitter.fire();
+      if (lizardLifecycle) {
+        console.log("cancelling lizard mode");
+        lizardLifecycle.cancel();
       }
 
-      cancelEmitter = new vscode.EventEmitter();
+      lizardLifecycle = lifecycle;
 
-      function cleanup() {
-        subscriptions.forEach((sub) => sub.dispose());
-      }
-
-      cancelEmitter.event(() => {
-        console.log("cancel lizard mode fired");
-        cancelled = true;
-        cleanup();
-      });
+      const statusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Left,
+        0,
+      );
+      statusBarItem.text = "Lizard Mode";
+      statusBarItem.tooltip = "Lizard Mode is active";
+      statusBarItem.command = "extension.toggleLizardMode"; // Example command
+      statusBarItem.backgroundColor = new vscode.ThemeColor(
+        "statusBarItem.warningBackground",
+      );
+      statusBarItem.show();
 
       vscode.commands.executeCommand("setContext", "lizardmode.capture", true);
-      subscriptions.push(
+      lifecycle.addDisposable(
         new vscode.Disposable(() => {
           vscode.commands.executeCommand(
             "setContext",
             "lizardmode.capture",
             false,
           );
-
           editor.setDecorations(focusedDecoratorType, []);
+          statusBarItem.dispose();
         }),
       );
 
@@ -118,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
               }
 
-              const cancelSubscription = cancelEmitter.event(() => {
+              const cancelSubscription = lifecycle.onCancel(() => {
                 cancelSubscription.dispose();
                 console.log("cancelled lizard mode");
                 reject(new CancelToken());
@@ -134,10 +139,10 @@ export function activate(context: vscode.ExtensionContext) {
             });
           },
           editor,
-          cancelEmitter,
+          lifecycle,
         );
 
-        subscriptions.push(
+        lifecycle.addDisposable(
           vscode.workspace.onDidChangeTextDocument((event) => {
             console.log("content changes", event.contentChanges);
             if (event.document === editor.document) {
@@ -160,8 +165,8 @@ export function activate(context: vscode.ExtensionContext) {
           }),
         );
 
-        // Enter vim normal mode before starting lizard mode
-        vscode.commands.executeCommand("extension.vim_escape");
+        // Enter normal mode before starting lizard mode
+        await vscode.commands.executeCommand("extension.vim_escape");
         await goToNodeAtCursor(lizardContext);
         await createLizardModeState(lizardContext);
       } catch (e) {
@@ -171,9 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
           console.error(e);
         }
       } finally {
-        if (!cancelled) {
-          cleanup();
-        }
+        lifecycle.cancel();
       }
     }
   }
