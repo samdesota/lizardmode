@@ -144,7 +144,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         lifecycle.addDisposable(
           vscode.workspace.onDidChangeTextDocument((event) => {
-            console.log("content changes", event.contentChanges);
             if (event.document === editor.document) {
               const newTree = applyEditsAndParseDocument(
                 parser,

@@ -517,13 +517,11 @@
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test",
     "jest": "jest"
   },
   "devDependencies": {
     "@chialab/esbuild-plugin-meta-url": "^0.18.2",
     "@types/lodash": "^4.17.7",
-    "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
     "@types/vscode": "^1.93.0",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
