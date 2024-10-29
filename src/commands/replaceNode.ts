@@ -1,5 +1,5 @@
 import { selectNode, selectStatementType } from "./jumpHints";
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 
 export async function replaceNode(ctx: LizardContext) {
   const currentNode = ctx.getCurrentNode();

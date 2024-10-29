@@ -1,11 +1,10 @@
-import * as vscode from "vscode";
 import {
   TreeSitter,
   TreeSitterLanguage,
   TreeSitterNode,
   TreeSitterPoint,
   TreeSitterTree,
-} from "./tree-sitter/treeSitter";
+} from "../tree-sitter/treeSitter";
 
 export type EditorEffect =
   | {

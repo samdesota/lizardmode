@@ -1,5 +1,4 @@
-import { SyntaxNode } from "tree-sitter";
-import { LizardContext } from "./stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import {
   TreeSitter,
   TreeSitterNode,

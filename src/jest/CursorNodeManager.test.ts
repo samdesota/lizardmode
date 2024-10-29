@@ -1,12 +1,12 @@
 import { Parser } from "@vscode/tree-sitter-wasm";
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import {
   TreeSitter,
   TreeSitterPoint,
   TreeSitterNode,
   initializeParser,
 } from "../tree-sitter/treeSitter";
-import { CursorNodeManager } from "../CursorNodeManager";
+import { CursorNodeManager } from "../vscode/CursorNodeManager";
 import * as assert from "assert";
 
 class TestContext implements LizardContext {

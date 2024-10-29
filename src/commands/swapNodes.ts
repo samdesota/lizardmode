@@ -1,4 +1,4 @@
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import { moveVertical, nextSibling } from "./navigation";
 
 export const swapSiblingNodes = async (

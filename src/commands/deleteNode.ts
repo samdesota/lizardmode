@@ -1,4 +1,4 @@
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import { findNextNodeVertically } from "./navigation";
 
 export const deleteNode = async (

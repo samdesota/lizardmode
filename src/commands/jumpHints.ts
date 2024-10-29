@@ -1,6 +1,6 @@
 import { assign, sortBy } from "lodash";
 import { debug } from "../utils/debug";
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import { TreeSitterNode, TreeSitterPoint } from "../tree-sitter/treeSitter";
 
 const dvorakAlphabet = "aoeuidhtnsqjkxbmwvzyfpglcr".split("");

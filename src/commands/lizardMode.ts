@@ -4,7 +4,7 @@ import { moveVertical } from "./navigation";
 import { replaceNode } from "./replaceNode";
 import { swapSiblingNodes } from "./swapNodes";
 import { jump, jumpToParent } from "./jumpHints";
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import { unwrapNode, wrapNode } from "./wrapNode";
 
 const keyMap = {

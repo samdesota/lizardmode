@@ -1,4 +1,4 @@
-import { LizardContext } from "../stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import { TreeSitterNode } from "../tree-sitter/treeSitter";
 import {
   findIndentationAtNode,
