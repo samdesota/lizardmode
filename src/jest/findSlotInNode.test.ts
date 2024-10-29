@@ -1,5 +1,5 @@
 import { insertNodeInSlot } from "../commands/findSlotInNode";
-import { initializeParser } from "../treeSitter";
+import { initializeParser } from "../tree-sitter/treeSitter";
 
 describe("findSlotInNode", () => {
   it("should find slot in node", async () => {

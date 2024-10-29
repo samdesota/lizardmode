@@ -1,5 +1,5 @@
 import { LizardContext } from "../stateContexts";
-import { TreeSitterNode } from "../treeSitter";
+import { TreeSitterNode } from "../tree-sitter/treeSitter";
 
 export type Direction = 1 | -1;
 

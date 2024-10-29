@@ -5,7 +5,7 @@ import {
   TreeSitterPoint,
   TreeSitterNode,
   initializeParser,
-} from "../treeSitter";
+} from "../tree-sitter/treeSitter";
 import { CursorNodeManager } from "../CursorNodeManager";
 import * as assert from "assert";
 

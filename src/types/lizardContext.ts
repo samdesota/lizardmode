@@ -5,7 +5,7 @@ import {
   TreeSitterNode,
   TreeSitterPoint,
   TreeSitterTree,
-} from "./treeSitter";
+} from "./tree-sitter/treeSitter";
 
 export type EditorEffect =
   | {

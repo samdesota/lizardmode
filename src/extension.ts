@@ -1,12 +1,15 @@
 import * as vscode from "vscode";
-import { CodeLizardContext } from "./CodeLizardContext";
-import { debug } from "./debug";
-import { createLizardModeState } from "./lizardMode";
-import { initializeParser, TreeSitter } from "./treeSitter";
+import { CodeLizardContext } from "./vscode/CodeLizardContext";
+import { debug } from "./utils/debug";
+import { createLizardModeState } from "./commands/lizardMode";
+import { initializeParser, TreeSitter } from "./tree-sitter/treeSitter";
 import { bindings } from "./scripts/keys";
-import { applyEditsAndParseDocument, parseDocument } from "./parseDocument";
-import { focusedDecoratorType } from "./vscodeBridge";
-import { Lifecycle } from "./lifecycle";
+import {
+  applyEditsAndParseDocument,
+  parseDocument,
+} from "./tree-sitter/parseDocument";
+import { focusedDecoratorType } from "./vscode/decoratorTypes";
+import { Lifecycle } from "./utils/lifecycle";
 import { goToNodeAtCursor } from "./commands/navigation";
 
 export function activate(context: vscode.ExtensionContext) {

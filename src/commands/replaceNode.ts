@@ -1,4 +1,4 @@
-import { selectNode, selectStatementType } from "../jumpHints";
+import { selectNode, selectStatementType } from "./jumpHints";
 import { LizardContext } from "../stateContexts";
 
 export async function replaceNode(ctx: LizardContext) {

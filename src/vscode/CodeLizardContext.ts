@@ -1,20 +1,16 @@
 import * as vscode from "vscode";
-import { LizardContext } from "./stateContexts";
+import { LizardContext } from "../types/lizardContext";
 import {
   TreeSitter,
   TreeSitterLanguage,
   TreeSitterNode,
   TreeSitterPoint,
   TreeSitterTree,
-} from "./treeSitter";
-import {
-  decoratorType,
-  focusedDecoratorType,
-  getRangesWithoutInitialWhitespace,
-  toVscodeRange,
-} from "./vscodeBridge";
+} from "../tree-sitter/treeSitter";
+import { getRangesWithoutInitialWhitespace, toVscodeRange } from "./ranges";
 import { CursorNodeManager } from "./CursorNodeManager";
-import { Lifecycle } from "./lifecycle";
+import { Lifecycle } from "../utils/lifecycle";
+import { hintDecoratorType, focusedDecoratorType } from "./decoratorTypes";
 
 export class CodeLizardContext implements LizardContext {
   private cursorNodeManager = new CursorNodeManager(this);
@@ -102,7 +98,7 @@ export class CodeLizardContext implements LizardContext {
 
   showHints(hints: { node: TreeSitterNode; hint: string }[]): void {
     this.editor.setDecorations(
-      decoratorType,
+      hintDecoratorType,
       hints.map((location) => {
         return {
           range: toVscodeRange(location.node.startPosition, {

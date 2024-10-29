@@ -1,6 +1,10 @@
 import { SyntaxNode } from "tree-sitter";
 import { LizardContext } from "./stateContexts";
-import { TreeSitter, TreeSitterNode, TreeSitterPoint } from "./treeSitter";
+import {
+  TreeSitter,
+  TreeSitterNode,
+  TreeSitterPoint,
+} from "../tree-sitter/treeSitter";
 
 export const wrapOptions: Record<
   string,

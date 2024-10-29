@@ -1,10 +1,10 @@
-import { createNode } from "./commands/createNode";
-import { deleteNode } from "./commands/deleteNode";
-import { moveVertical } from "./commands/navigation";
-import { replaceNode } from "./commands/replaceNode";
-import { swapSiblingNodes } from "./commands/swapNodes";
+import { createNode } from "./createNode";
+import { deleteNode } from "./deleteNode";
+import { moveVertical } from "./navigation";
+import { replaceNode } from "./replaceNode";
+import { swapSiblingNodes } from "./swapNodes";
 import { jump, jumpToParent } from "./jumpHints";
-import { LizardContext } from "./stateContexts";
+import { LizardContext } from "../stateContexts";
 import { unwrapNode, wrapNode } from "./wrapNode";
 
 const keyMap = {

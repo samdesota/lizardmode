@@ -1,5 +1,5 @@
-import { LizardContext } from "./stateContexts";
-import { TreeSitterNode, TreeSitterTree } from "./treeSitter";
+import { LizardContext } from "../types/lizardContext";
+import { TreeSitterNode, TreeSitterTree } from "../tree-sitter/treeSitter";
 
 export function findNodeByPosition(
   tree: TreeSitterTree,

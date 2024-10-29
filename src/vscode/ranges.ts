@@ -1,32 +1,10 @@
 import * as vscode from "vscode";
-import { TreeSitterNode } from "./treeSitter";
+import { TreeSitterNode } from "../tree-sitter/treeSitter";
 
 export interface CodeContext {
   editor: vscode.TextEditor;
   setCurrentNode(node: TreeSitterNode | null): void;
 }
-
-export const decoratorType = vscode.window.createTextEditorDecorationType({
-  rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed,
-  after: {
-    backgroundColor: "white",
-    color: "black",
-    margin: `0 0 0 -1.2em`,
-  },
-});
-
-export const focusedDecoratorType =
-  vscode.window.createTextEditorDecorationType({
-    borderRadius: "3px",
-
-    dark: {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-    },
-
-    light: {
-      backgroundColor: "rgba(0, 0, 0, 0.1)",
-    },
-  });
 
 export const toVscodeRange = (
   a: TreeSitterNode["startPosition"],

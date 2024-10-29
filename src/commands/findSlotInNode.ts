@@ -1,4 +1,4 @@
-import { TreeSitterNode } from "../treeSitter";
+import { TreeSitterNode } from "../tree-sitter/treeSitter";
 import tsxGrammar from "tree-sitter-typescript/tsx/src/grammar.json";
 
 export function insertNodeInSlot(node: TreeSitterNode, nodeType: string) {

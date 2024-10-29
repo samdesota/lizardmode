@@ -1,10 +1,10 @@
 import { LizardContext } from "../stateContexts";
-import { TreeSitterNode } from "../treeSitter";
+import { TreeSitterNode } from "../tree-sitter/treeSitter";
 import {
   findIndentationAtNode,
   getIndentedNode,
   wrapOptions,
-} from "../wrapNode";
+} from "./wrapNode";
 
 const findBlockNode = (currentNode: TreeSitterNode): TreeSitterNode | null => {
   if (currentNode.type === "statement_block") {
